@@ -1,0 +1,71 @@
+export type PredictionRequest = {
+  grainSize: number;
+  annealTempC: number;
+  scanSpeed: number;
+  model: string;
+};
+
+export type PredictionResponse = {
+  prediction: number[][];
+  uncertainty: number[][];
+  metadata: {
+    model: string;
+    runtimeMs: number;
+    resolution: string;
+    grainSize: number;
+    annealTempC: number;
+    scanSpeed: number;
+  };
+};
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function makeField(size: number, seed: number): number[][] {
+  return Array.from({ length: size }, (_, y) =>
+    Array.from({ length: size }, (_, x) => {
+      const waveA = Math.sin((x + seed) / 2.7);
+      const waveB = Math.cos((y - seed) / 3.1);
+      const waveC = Math.sin((x * y + seed) / 37);
+      const normalized = (waveA + waveB + waveC + 3) / 6;
+      return Math.max(0, Math.min(1, normalized));
+    })
+  );
+}
+
+function deriveUncertainty(field: number[][]): number[][] {
+  return field.map((row) => row.map((value) => Math.abs(0.5 - value) * 1.9));
+}
+
+async function mockPredict(request: PredictionRequest): Promise<PredictionResponse> {
+  const runtimeMs = 2000 + Math.floor(Math.random() * 1001);
+  await sleep(runtimeMs);
+
+  const seed = Math.floor(
+    request.grainSize * 0.9 + request.annealTempC * 0.05 + request.scanSpeed * 2.1
+  );
+  const prediction = makeField(28, seed);
+
+  return {
+    prediction,
+    uncertainty: deriveUncertainty(prediction),
+    metadata: {
+      model: request.model,
+      runtimeMs,
+      resolution: `${prediction.length}x${prediction[0].length}`,
+      grainSize: request.grainSize,
+      annealTempC: request.annealTempC,
+      scanSpeed: request.scanSpeed
+    }
+  };
+}
+
+export async function requestPrediction(
+  request: PredictionRequest
+): Promise<PredictionResponse> {
+  // Swap this call to a real endpoint later without touching UI components.
+  return mockPredict(request);
+}
