@@ -1,8 +1,11 @@
+export type FidelityLevel = "sim_low" | "sim_high" | "experiment";
+
 export type PredictionRequest = {
   grainSize: number;
   annealTempC: number;
   scanSpeed: number;
   model: string;
+  fidelityLevel?: FidelityLevel;
 };
 
 export type PredictionResponse = {
@@ -15,6 +18,7 @@ export type PredictionResponse = {
     grainSize: number;
     annealTempC: number;
     scanSpeed: number;
+    fidelityLevel?: FidelityLevel;
   };
 };
 
@@ -43,6 +47,7 @@ function deriveUncertainty(field: number[][]): number[][] {
 async function mockPredict(request: PredictionRequest): Promise<PredictionResponse> {
   const runtimeMs = 2000 + Math.floor(Math.random() * 1001);
   await sleep(runtimeMs);
+  const fidelityLevel = request.fidelityLevel ?? "sim_low";
 
   const seed = Math.floor(
     request.grainSize * 0.9 + request.annealTempC * 0.05 + request.scanSpeed * 2.1
@@ -58,7 +63,8 @@ async function mockPredict(request: PredictionRequest): Promise<PredictionRespon
       resolution: `${prediction.length}x${prediction[0].length}`,
       grainSize: request.grainSize,
       annealTempC: request.annealTempC,
-      scanSpeed: request.scanSpeed
+      scanSpeed: request.scanSpeed,
+      fidelityLevel
     }
   };
 }

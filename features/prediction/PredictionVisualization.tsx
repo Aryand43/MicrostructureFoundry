@@ -134,11 +134,12 @@ export function PredictionVisualization({
           </div>
         </div>
 
-        {activeTab === "Metadata" && result ? (
+        {activeTab === "Metadata" ? (
           <div className="rounded-lg border border-micro-border bg-black/20 p-3 text-sm text-slate-300">
-            <p>Model: {result.metadata.model}</p>
-            <p>Runtime: {result.metadata.runtimeMs} ms</p>
-            <p>Grain Size: {result.metadata.grainSize} um</p>
+            <p>Model: {result?.metadata.model ?? "--"}</p>
+            <p>Runtime: {result?.metadata.runtimeMs ?? "--"} ms</p>
+            <p>Grain Size: {result?.metadata.grainSize ?? "--"} um</p>
+            <p>Fidelity Level: {result?.metadata.fidelityLevel ?? "--"}</p>
           </div>
         ) : null}
       </div>

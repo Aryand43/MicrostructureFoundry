@@ -8,18 +8,20 @@ import {
   PredictionVisualization,
   type PredictionTab
 } from "@/features/prediction/PredictionVisualization";
+import { type FidelityLevel } from "@/lib/api/prediction";
 
 export function PredictionWorkspace() {
   const [grainSize, setGrainSize] = useState(42);
   const [annealTempC, setAnnealTempC] = useState(900);
   const [scanSpeed, setScanSpeed] = useState(14);
   const [model, setModel] = useState("AtlasNet-v1");
+  const [fidelityLevel, setFidelityLevel] = useState<FidelityLevel>("sim_low");
   const [activeTab, setActiveTab] = useState<PredictionTab>("Prediction");
   const { status, progress, result, errorMessage, runJob } = usePredictionJob();
   const isSubmitting = status === "Running";
 
   async function handlePredict() {
-    await runJob({ grainSize, annealTempC, scanSpeed, model });
+    await runJob({ grainSize, annealTempC, scanSpeed, model, fidelityLevel });
   }
 
   return (
@@ -87,6 +89,18 @@ export function PredictionWorkspace() {
             <option>AtlasNet-v1</option>
             <option>AtlasNet-v2</option>
             <option>Diffusion-Lite</option>
+          </select>
+        </label>
+        <label className="block space-y-2">
+          <span className="text-sm text-slate-400">Fidelity Level</span>
+          <select
+            value={fidelityLevel}
+            onChange={(event) => setFidelityLevel(event.target.value as FidelityLevel)}
+            className="w-full rounded-xl border border-micro-border bg-micro-bg px-3 py-2 text-sm text-slate-200 outline-none ring-0 focus:border-micro-accent"
+          >
+            <option value="sim_low">Simulation - Low</option>
+            <option value="sim_high">Simulation - High</option>
+            <option value="experiment">Experiment</option>
           </select>
         </label>
         <Button onClick={handlePredict} disabled={isSubmitting}>
