@@ -92,15 +92,15 @@ export function PredictionWorkspace() {
           </select>
         </label>
         <label className="block space-y-2">
-          <span className="text-sm text-slate-400">Fidelity Level</span>
+          <span className="text-sm text-slate-400">Fidelity</span>
           <select
             value={fidelityLevel}
             onChange={(event) => setFidelityLevel(event.target.value as FidelityLevel)}
             className="w-full rounded-xl border border-micro-border bg-micro-bg px-3 py-2 text-sm text-slate-200 outline-none ring-0 focus:border-micro-accent"
           >
-            <option value="sim_low">Simulation - Low</option>
-            <option value="sim_high">Simulation - High</option>
-            <option value="experiment">Experiment</option>
+            <option value="sim_low">Simulation - low</option>
+            <option value="sim_high">Simulation - high</option>
+            <option value="experiment">Experiment-calibrated</option>
           </select>
         </label>
         <Button onClick={handlePredict} disabled={isSubmitting}>

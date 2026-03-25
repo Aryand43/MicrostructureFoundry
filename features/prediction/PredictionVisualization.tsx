@@ -29,6 +29,26 @@ function getHeatmapData(
   return result.prediction;
 }
 
+function getUncertaintySummary(result: PredictionResponse | null): {
+  mean: number;
+  max: number;
+} | null {
+  if (!result) {
+    return null;
+  }
+
+  const values = result.uncertainty.flat();
+  if (!values.length) {
+    return null;
+  }
+
+  const sum = values.reduce((accumulator, value) => accumulator + value, 0);
+  const mean = sum / values.length;
+  const max = Math.max(...values);
+
+  return { mean, max };
+}
+
 function Heatmap({ data }: { data: number[][] }) {
   const columns = data[0]?.length ?? 1;
 
@@ -77,6 +97,7 @@ export function PredictionVisualization({
   onTabChange
 }: PredictionVisualizationProps) {
   const heatmapData = getHeatmapData(activeTab, result);
+  const uncertaintySummary = getUncertaintySummary(result);
 
   return (
     <div className="space-y-5">
@@ -116,6 +137,10 @@ export function PredictionVisualization({
         ) : (
           <HeatmapSkeleton isRunning={status === "Running"} />
         )}
+        <p className="text-sm text-slate-400">
+          Uncertainty: mean {uncertaintySummary?.mean.toFixed(2) ?? "--"}, max{" "}
+          {uncertaintySummary?.max.toFixed(2) ?? "--"}.
+        </p>
 
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-lg border border-micro-border bg-black/20 p-3">
@@ -139,7 +164,7 @@ export function PredictionVisualization({
             <p>Model: {result?.metadata.model ?? "--"}</p>
             <p>Runtime: {result?.metadata.runtimeMs ?? "--"} ms</p>
             <p>Grain Size: {result?.metadata.grainSize ?? "--"} um</p>
-            <p>Fidelity Level: {result?.metadata.fidelityLevel ?? "--"}</p>
+            <p>Fidelity: {result?.metadata.fidelityLevel ?? "--"}</p>
           </div>
         ) : null}
       </div>
