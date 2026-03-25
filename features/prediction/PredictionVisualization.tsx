@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { type PredictionResponse } from "@/lib/api/prediction";
 import { type JobStatus } from "@/features/prediction/usePredictionJob";
 
@@ -27,26 +28,6 @@ function getHeatmapData(
   }
 
   return result.prediction;
-}
-
-function getUncertaintySummary(result: PredictionResponse | null): {
-  mean: number;
-  max: number;
-} | null {
-  if (!result) {
-    return null;
-  }
-
-  const values = result.uncertainty.flat();
-  if (!values.length) {
-    return null;
-  }
-
-  const sum = values.reduce((accumulator, value) => accumulator + value, 0);
-  const mean = sum / values.length;
-  const max = Math.max(...values);
-
-  return { mean, max };
 }
 
 function Heatmap({ data }: { data: number[][] }) {
@@ -96,13 +77,43 @@ export function PredictionVisualization({
   activeTab,
   onTabChange
 }: PredictionVisualizationProps) {
+  type MetadataWithDataset = PredictionResponse["metadata"] & { datasetId?: string };
   const heatmapData = getHeatmapData(activeTab, result);
-  const uncertaintySummary = getUncertaintySummary(result);
+  const uncertaintyValues = result?.uncertainty.flat();
+  const meanUncertainty =
+    uncertaintyValues && uncertaintyValues.length
+      ? (uncertaintyValues.reduce((sum, value) => sum + value, 0) / uncertaintyValues.length).toFixed(
+          2
+        )
+      : undefined;
+  const maxUncertainty =
+    uncertaintyValues && uncertaintyValues.length
+      ? Math.max(...uncertaintyValues).toFixed(2)
+      : undefined;
+  const [completedAt, setCompletedAt] = useState("--");
+  const previousStatusRef = useRef<JobStatus>(status);
+  const datasetFromMetadata = result
+    ? (result.metadata as MetadataWithDataset).datasetId
+    : undefined;
+
+  useEffect(() => {
+    if (status === "Complete" && previousStatusRef.current !== "Complete") {
+      setCompletedAt(new Date().toLocaleTimeString("en-GB", { hour12: false }));
+    }
+    previousStatusRef.current = status;
+  }, [status]);
 
   return (
     <div className="space-y-5">
       <div>
         <h2 className="text-xl font-medium">Visualization</h2>
+        <p className="mt-2 text-sm text-slate-400">
+          {result
+            ? `Last run: ${result.metadata.model}, ${
+                result.metadata.fidelityLevel ?? "sim_low"
+              }, runtime ${result.metadata.runtimeMs} ms`
+            : "Last run: --"}
+        </p>
         <p className="mt-2 text-sm text-slate-400">
           Tabbed output panel that receives prediction job data.
         </p>
@@ -137,9 +148,11 @@ export function PredictionVisualization({
         ) : (
           <HeatmapSkeleton isRunning={status === "Running"} />
         )}
-        <p className="text-sm text-slate-400">
-          Uncertainty: mean {uncertaintySummary?.mean.toFixed(2) ?? "--"}, max{" "}
-          {uncertaintySummary?.max.toFixed(2) ?? "--"}.
+        <p className="text-xs text-slate-500">
+          Legend: darker = lower value, brighter = higher value (normalized 0-1).
+        </p>
+        <p className="text-xs text-slate-400">
+          Uncertainty: mean {meanUncertainty ?? "--"}, max {maxUncertainty ?? "--"}
         </p>
 
         <div className="grid gap-3 sm:grid-cols-3">
@@ -158,13 +171,29 @@ export function PredictionVisualization({
             </p>
           </div>
         </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-micro-border bg-black/20 p-3">
+            <p className="text-xs uppercase tracking-[0.12em] text-slate-500">
+              Estimated full simulation
+            </p>
+            <p className="mt-1 text-sm text-slate-200">≈ 60 min on 16 CPU cores</p>
+          </div>
+          <div className="rounded-lg border border-micro-border bg-black/20 p-3">
+            <p className="text-xs uppercase tracking-[0.12em] text-slate-500">PRISM surrogate</p>
+            <p className="mt-1 text-sm text-slate-200">
+              {result ? `${result.metadata.runtimeMs} ms` : "≈ 2–3 s"}
+            </p>
+          </div>
+        </div>
 
-        {activeTab === "Metadata" ? (
+        {activeTab === "Metadata" && result ? (
           <div className="rounded-lg border border-micro-border bg-black/20 p-3 text-sm text-slate-300">
-            <p>Model: {result?.metadata.model ?? "--"}</p>
-            <p>Runtime: {result?.metadata.runtimeMs ?? "--"} ms</p>
-            <p>Grain Size: {result?.metadata.grainSize ?? "--"} um</p>
-            <p>Fidelity: {result?.metadata.fidelityLevel ?? "--"}</p>
+            <p>Model: {result.metadata.model}</p>
+            <p>Runtime: {result.metadata.runtimeMs} ms</p>
+            <p>Grain Size: {result.metadata.grainSize} um</p>
+            <p>Fidelity: {result.metadata.fidelityLevel ?? "--"}</p>
+            <p>Dataset: {datasetFromMetadata ?? "--"}</p>
+            <p>Completed at: {completedAt}</p>
           </div>
         ) : null}
       </div>

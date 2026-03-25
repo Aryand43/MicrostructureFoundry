@@ -14,6 +14,7 @@ export function PredictionWorkspace() {
   const [grainSize, setGrainSize] = useState(42);
   const [annealTempC, setAnnealTempC] = useState(900);
   const [scanSpeed, setScanSpeed] = useState(14);
+  const [datasetId, setDatasetId] = useState<string>("exp-001");
   const [model, setModel] = useState("AtlasNet-v1");
   const [fidelityLevel, setFidelityLevel] = useState<FidelityLevel>("sim_low");
   const [activeTab, setActiveTab] = useState<PredictionTab>("Prediction");
@@ -21,7 +22,15 @@ export function PredictionWorkspace() {
   const isSubmitting = status === "Running";
 
   async function handlePredict() {
-    await runJob({ grainSize, annealTempC, scanSpeed, model, fidelityLevel });
+    const requestPayload = {
+      grainSize,
+      annealTempC,
+      scanSpeed,
+      model,
+      fidelityLevel,
+      datasetId
+    };
+    await runJob(requestPayload);
   }
 
   return (
@@ -33,6 +42,7 @@ export function PredictionWorkspace() {
             Configure inputs and launch a prediction run.
           </p>
         </div>
+        <p className="text-sm uppercase tracking-[0.12em] text-slate-500">Input data</p>
         <div className="space-y-2">
           <span className="text-sm text-slate-400">Microstructure File</span>
           <label className="flex cursor-not-allowed items-center justify-between rounded-xl border border-dashed border-micro-border bg-black/20 px-4 py-3 text-sm text-slate-500">
@@ -43,6 +53,21 @@ export function PredictionWorkspace() {
             <input type="file" disabled className="hidden" />
           </label>
         </div>
+        <label className="block space-y-2">
+          <span className="text-sm text-slate-400">Dataset</span>
+          <select
+            value={datasetId}
+            onChange={(event) => setDatasetId(event.target.value)}
+            className="w-full rounded-xl border border-micro-border bg-micro-bg px-3 py-2 text-sm text-slate-200 outline-none ring-0 focus:border-micro-accent"
+          >
+            <option value="exp-001">exp-001 (central track)</option>
+            <option value="exp-002">exp-002 (edge track)</option>
+            <option value="sim-001">sim-001 (baseline sim)</option>
+          </select>
+        </label>
+        <p className="text-sm uppercase tracking-[0.12em] text-slate-500">
+          Process parameters
+        </p>
         <label className="block space-y-2">
           <span className="text-sm text-slate-400">Mean Grain Size (um): {grainSize}</span>
           <input
@@ -79,6 +104,7 @@ export function PredictionWorkspace() {
             onChange={(event) => setScanSpeed(Number(event.target.value))}
           />
         </label>
+        <p className="text-sm uppercase tracking-[0.12em] text-slate-500">Model & fidelity</p>
         <label className="block space-y-2">
           <span className="text-sm text-slate-400">Model</span>
           <select
