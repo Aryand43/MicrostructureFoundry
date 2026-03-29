@@ -152,7 +152,18 @@ export type PredictionRequest = {
   annealTempC: number;
   scanSpeed: number;
   model: string;
-  // future: fidelityLevel, datasetId, etc.
+  fidelityLevel?: FidelityLevel;
+  datasetId?: string;
+  laserPower?: number;
+  hatchSpacing?: number;
+  layerHeight?: number;
+  powderFlowRate?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  x?: number;
+  y?: number;
+  z?: number;
 };
 ```
 
@@ -162,6 +173,12 @@ Rules:
   - `grainSize` – micrometers.
   - `annealTempC` – Celsius.
   - `scanSpeed` – mm/s.
+  - `laserPower` – watts.
+  - `hatchSpacing` – micrometers.
+  - `layerHeight` – micrometers.
+  - `powderFlowRate` – g/min.
+  - `length`, `width`, `height` – millimeters.
+  - `x`, `y`, `z` – spatial query coordinates.
 - Any new fields should have:
   - A clear domain meaning.
   - Matching labels in control panel UI.
@@ -174,6 +191,7 @@ Current shape:
 export type PredictionResponse = {
   prediction: number[][];
   uncertainty: number[][];
+  grainSizeField?: number[][];
   metadata: {
     model: string;
     runtimeMs: number;
@@ -181,7 +199,13 @@ export type PredictionResponse = {
     grainSize: number;
     annealTempC: number;
     scanSpeed: number;
-    // future: fidelityLevel, numSimSamples, numExpSamples, calibrationStatus, etc.
+    fidelityLevel?: FidelityLevel;
+    datasetId?: string;
+    x?: number;
+    y?: number;
+    z?: number;
+    laserPower?: number;
+    layerHeight?: number;
   };
 };
 ```

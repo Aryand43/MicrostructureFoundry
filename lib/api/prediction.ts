@@ -85,6 +85,8 @@ async function mockPredict(request: PredictionRequest): Promise<PredictionRespon
       model: request.model,
       runtimeMs,
       resolution: `${prediction.length}x${prediction[0].length}`,
+      // NOTE: grainSize is currently a legacy input parameter.
+      // It will be replaced by a spatial grainSizeField output in a future iteration.
       grainSize: request.grainSize,
       annealTempC: request.annealTempC,
       scanSpeed: request.scanSpeed,

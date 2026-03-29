@@ -105,7 +105,6 @@ export function PredictionVisualization({
   activeTab,
   onTabChange
 }: PredictionVisualizationProps) {
-  type MetadataWithDataset = PredictionResponse["metadata"] & { datasetId?: string };
   const heatmapData = getHeatmapData(activeTab, result);
   const uncertaintyValues = result?.uncertainty.flat();
   const meanUncertainty =
@@ -120,9 +119,7 @@ export function PredictionVisualization({
       : undefined;
   const [completedAt, setCompletedAt] = useState("--");
   const previousStatusRef = useRef<JobStatus>(status);
-  const datasetFromMetadata = result
-    ? (result.metadata as MetadataWithDataset).datasetId
-    : undefined;
+  const datasetFromMetadata = result?.metadata.datasetId;
 
   useEffect(() => {
     if (status === "Complete" && previousStatusRef.current !== "Complete") {
@@ -250,13 +247,15 @@ export function PredictionVisualization({
                 ["Grain Size", `${result.metadata.grainSize} um`],
                 ["Anneal Temp", `${result.metadata.annealTempC} C`],
                 ["Scan Speed", `${result.metadata.scanSpeed} mm/s`],
+                ["Query (X,Y,Z)", `${result.metadata.x ?? 0}, ${result.metadata.y ?? 0}, ${result.metadata.z ?? 0}`],
+                ["Laser Power", result.metadata.laserPower != null ? `${result.metadata.laserPower} W` : "--"],
                 ["Completed at", completedAt]
               ].map(([label, value], index) => (
                 <div
                   key={label}
                   className={cn(
                     "border-micro-border/60 pb-2",
-                    index < 7 ? "border-b" : "border-b-0"
+                    index < 9 ? "border-b" : "border-b-0"
                   )}
                 >
                   <dt className="text-xs uppercase tracking-[0.12em] text-slate-500">{label}</dt>
