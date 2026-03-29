@@ -6,11 +6,23 @@ export type PredictionRequest = {
   scanSpeed: number;
   model: string;
   fidelityLevel?: FidelityLevel;
+  datasetId?: string;
+  laserPower?: number;
+  hatchSpacing?: number;
+  layerHeight?: number;
+  powderFlowRate?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  x?: number;
+  y?: number;
+  z?: number;
 };
 
 export type PredictionResponse = {
   prediction: number[][];
   uncertainty: number[][];
+  grainSizeField?: number[][];
   metadata: {
     model: string;
     runtimeMs: number;
@@ -50,7 +62,14 @@ async function mockPredict(request: PredictionRequest): Promise<PredictionRespon
   const fidelityLevel = request.fidelityLevel ?? "sim_low";
 
   const seed = Math.floor(
-    request.grainSize * 0.9 + request.annealTempC * 0.05 + request.scanSpeed * 2.1
+    (request.laserPower ?? 200) * 0.3 +
+    request.scanSpeed * 1.5 +
+    (request.layerHeight ?? 50) * 0.8 +
+    (request.x ?? 0) * 2 +
+    (request.y ?? 0) * 2 +
+    (request.z ?? 0) * 2 +
+    request.grainSize * 0.9 +
+    request.annealTempC * 0.05
   );
   const prediction = makeField(28, seed);
 

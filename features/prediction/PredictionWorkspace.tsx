@@ -46,6 +46,9 @@ export function PredictionWorkspace() {
   const [datasetId, setDatasetId] = useState<string>("exp-001");
   const [model, setModel] = useState("AtlasNet-v1");
   const [fidelityLevel, setFidelityLevel] = useState<FidelityLevel>("sim_low");
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
+  const [z, setZ] = useState(0);
   const [activeTab, setActiveTab] = useState<PredictionTab>("Prediction");
   const { status, progress, result, errorMessage, runJob } = usePredictionJob();
   const isSubmitting = status === "Running";
@@ -57,7 +60,17 @@ export function PredictionWorkspace() {
       scanSpeed,
       model,
       fidelityLevel,
-      datasetId
+      datasetId,
+      laserPower: 200,
+      hatchSpacing: 100,
+      layerHeight: 50,
+      powderFlowRate: 5,
+      length: 10,
+      width: 10,
+      height: 5,
+      x,
+      y,
+      z
     };
     await runJob(requestPayload);
   }
@@ -114,7 +127,7 @@ export function PredictionWorkspace() {
           </div>
         </div>
 
-        <label className="block space-y-2">
+        <label className="block space-y-2 opacity-50">
           <span className="text-sm text-slate-400">Mean Grain Size (um): {grainSize}</span>
           <input
             className="w-full accent-micro-accent"
@@ -123,7 +136,7 @@ export function PredictionWorkspace() {
             max={140}
             step={1}
             value={grainSize}
-            onChange={(event) => setGrainSize(Number(event.target.value))}
+            disabled
           />
         </label>
         <label className="block space-y-2">
@@ -150,6 +163,123 @@ export function PredictionWorkspace() {
             onChange={(event) => setScanSpeed(Number(event.target.value))}
           />
         </label>
+
+        <div className="mt-4 border-t border-micro-border/60 pt-4">
+          <SectionLabel>Physics Parameters</SectionLabel>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 opacity-50">
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Material</span>
+              <input
+                type="text"
+                value="SS316L"
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Laser Power (W)</span>
+              <input
+                type="number"
+                value={200}
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Hatch Spacing (um)</span>
+              <input
+                type="number"
+                value={100}
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Layer Height (um)</span>
+              <input
+                type="number"
+                value={50}
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+            <label className="block space-y-1 sm:col-span-2">
+              <span className="text-sm text-slate-400">Powder Flow Rate (g/min)</span>
+              <input
+                type="number"
+                value={5}
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-micro-border/60 pt-4">
+          <SectionLabel>Geometry</SectionLabel>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3 opacity-50">
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Length (mm)</span>
+              <input
+                type="number"
+                value={10}
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Width (mm)</span>
+              <input
+                type="number"
+                value={10}
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Height (mm)</span>
+              <input
+                type="number"
+                value={5}
+                disabled
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-micro-border/60 pt-4">
+          <SectionLabel>Query Point (X / Y / Z)</SectionLabel>
+          <div className="mt-3 grid gap-3 grid-cols-3">
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">X</span>
+              <input
+                type="number"
+                value={x}
+                onChange={(e) => setX(Number(e.target.value))}
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200 transition-colors outline-none ring-0 hover:border-micro-accent/50 focus:border-micro-accent"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Y</span>
+              <input
+                type="number"
+                value={y}
+                onChange={(e) => setY(Number(e.target.value))}
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200 transition-colors outline-none ring-0 hover:border-micro-accent/50 focus:border-micro-accent"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-sm text-slate-400">Z</span>
+              <input
+                type="number"
+                value={z}
+                onChange={(e) => setZ(Number(e.target.value))}
+                className="w-full rounded-xl border border-micro-border bg-micro-bg-soft px-3 py-2 text-sm text-slate-200 transition-colors outline-none ring-0 hover:border-micro-accent/50 focus:border-micro-accent"
+              />
+            </label>
+          </div>
+        </div>
 
         <div className="mt-4 border-t border-micro-border/60 pt-4">
           <SectionLabel>Model & fidelity</SectionLabel>
