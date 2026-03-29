@@ -31,6 +31,12 @@ export type PredictionResponse = {
     annealTempC: number;
     scanSpeed: number;
     fidelityLevel?: FidelityLevel;
+    datasetId?: string;
+    x?: number;
+    y?: number;
+    z?: number;
+    laserPower?: number;
+    layerHeight?: number;
   };
 };
 
@@ -68,7 +74,6 @@ async function mockPredict(request: PredictionRequest): Promise<PredictionRespon
     (request.x ?? 0) * 2 +
     (request.y ?? 0) * 2 +
     (request.z ?? 0) * 2 +
-    request.grainSize * 0.9 +
     request.annealTempC * 0.05
   );
   const prediction = makeField(28, seed);
@@ -83,7 +88,13 @@ async function mockPredict(request: PredictionRequest): Promise<PredictionRespon
       grainSize: request.grainSize,
       annealTempC: request.annealTempC,
       scanSpeed: request.scanSpeed,
-      fidelityLevel
+      fidelityLevel,
+      datasetId: request.datasetId,
+      x: request.x,
+      y: request.y,
+      z: request.z,
+      laserPower: request.laserPower,
+      layerHeight: request.layerHeight
     }
   };
 }

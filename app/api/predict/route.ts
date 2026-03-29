@@ -4,19 +4,11 @@ import { requestPrediction, type PredictionRequest } from "@/lib/api/prediction"
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<PredictionRequest>;
-    const {
-      grainSize,
-      annealTempC,
-      scanSpeed,
-      model,
-      fidelityLevel
-    } = body;
 
     const isValid =
-      typeof grainSize === "number" &&
-      typeof annealTempC === "number" &&
-      typeof scanSpeed === "number" &&
-      typeof model === "string";
+      typeof body.annealTempC === "number" &&
+      typeof body.scanSpeed === "number" &&
+      typeof body.model === "string";
 
     if (!isValid) {
       return NextResponse.json(
@@ -25,13 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await requestPrediction({
-      grainSize,
-      annealTempC,
-      scanSpeed,
-      model,
-      fidelityLevel
-    });
+    const response = await requestPrediction(body as PredictionRequest);
 
     return NextResponse.json(response, { status: 200 });
   } catch {
